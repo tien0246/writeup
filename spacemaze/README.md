@@ -58,17 +58,17 @@ I loaded the dumped DLLs into dnSpy to investigate further.
 
 #### 2.1 Teleportation Magic
 
-Finding player coordinates was straightforward. In the **Player** class, which inherits from **NetworkBehaviour**, I found an `Update()` method. This led me to:
+Finding player coordinates was straightforward. In the **Player** class, which inherits from **Component**, I found an `Update()` method. This led me to:
 - `Component$$getTransform`  
 - `Transform$$setPosition`  
 
-**Pro Tip:** The **Player** class has a field:
+The **Player** class has a field form **NetworkBehaviour**:
 ```csharp
 private bool <IsLocalPlayer>k__BackingField; // 0x1C
 ```
 This is super useful to distinguish my player from others because Unity tends to update all players in the same function. And no, I don’t want to mess with other players—too chaotic. 😂  
 
-Using Frida, I hooked into the relevant functions and wrote the following script to teleport myself randomly.
+Using Frida, I hooked into the relevant functions and wrote the following script to teleport myself randomly. onLeave will call after the hook function and onenter will call before the hook function. I have to call in onLeave because in the update function there is code to update your coordinates. I don't want to teleport to the portal and then be teleported back to the same place lol. args[0] is the function's this pointer.
 
 ```javascript
 function waitForModule(moduleName, callback) {
@@ -278,7 +278,7 @@ waitForModule('GameAssembly.dll', function (baseAddr: any) {
 
 ### Results
 
-After zooming through 50+ portals, here’s the final screenshot:  
+After teleport through 50 portals, here’s the final flag:  
 ![Result](./images/result.jpg)  
 
 ---
